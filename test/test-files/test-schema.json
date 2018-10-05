@@ -1,0 +1,179 @@
+{
+    "comments": [
+        "AS ML Datalab Schema",
+        "-- diagram is at https://www.draw.io/#G1p2M18UiLJ32mwkaGqGQdo0GjbQoCWNOk",
+        "-- ask for access at giovanyvega@akcelita.com"
+    ],
+    "database": "MySQL",
+    "models": [
+        {   "name": "users",
+            "fields": [
+                { "name": "id", "type": "int", "canBeNull": false, "autoIncrement": true},
+                { "name": "login", "type": "varchar(255)", "canBeNull": false},
+                { "name": "password", "type": "varchar(255)", "canBeNull": false},
+                { "name": "email", "type": "varchar(255)", "canBeNull": false}
+            ],
+            "primaryKey": [ "id" ],
+            "dbOptions" : "ENGINE=InnoDB DEFAULT CHARSET=latin1"
+        },
+        {   "name": "tasks",
+            "fields" : [
+                { "name": "id", "type": "int", "canBeNull": false, "autoIncrement": true},
+                { "name": "name", "type": "varchar(255)", "canBeNull": false},
+                { "name": "description", "type": "text", "canBeNull": false}
+            ],
+            "primaryKey": [ "id" ],
+            "dbOptions" : "ENGINE=InnoDB DEFAULT CHARSET=latin1"
+        },
+        {   "name": "datasets",
+            "fields" : [
+                { "name": "id", "type": "int", "canBeNull": false, "autoIncrement": true},
+                { "name": "name", "type": "varchar(255)", "canBeNull": false},
+                { "name": "type", "type": "enum", "values":["images"], "canBeNull": false},
+                { "name": "taskId", "type": "int", "canBeNull": false},
+                { "name": "uri", "type": "varchar(255)", "canBeNull": false},
+                { "name": "description", "type": "text", "canBeNull": false},
+                { "name": "props", "type": "json", "canBeNull": false}
+            ],
+            "primaryKey": [ "id" ],
+            "keys": [
+                {"name": "fk_datasets_1_idx", "fields": [ {"name":"taskId", "sort":"ASC"} ] }
+            ],
+            "constraints": [
+                {"name": "fk_datasets_1", "type": "foreignKey", "field": "taskId", "reference": { "table" :  "tasks", "field": "id" }, "onDelete": "noAction", "onUpdate": "noAction"}
+            ],
+            "dbOptions" : "ENGINE=InnoDB DEFAULT CHARSET=latin1"
+        },
+        {   "name": "roles",
+            "fields" : [
+                { "name": "id", "type": "int", "canBeNull": false, "autoIncrement": true},
+                { "name": "name", "type": "varchar(255)", "canBeNull": false},
+                { "name": "isSystemRole", "type": "tinyint(1)", "canBeNull": false, "default": 0}
+            ],
+            "primaryKey": [ "id" ],
+            "dbOptions" : "ENGINE=InnoDB DEFAULT CHARSET=latin1"
+        },
+        {   "name": "permissions",
+            "fields" : [
+                { "name": "id", "type": "int", "canBeNull": false, "autoIncrement": true},
+                { "name": "uri", "type": "varchar(255)", "canBeNull": false},
+                { "name": "name", "type": "varchar(255)", "canBeNull": false},
+                { "name": "description", "type": "text", "canBeNull": false}
+            ],
+            "primaryKey": [ "id" ],
+            "dbOptions" : "ENGINE=InnoDB DEFAULT CHARSET=latin1"
+        },
+        {   "name": "rolePermissions",
+            "fields" : [
+                { "name": "roleId", "type": "int", "canBeNull": false},
+                { "name": "permissionId", "type": "int", "canBeNull": false}
+            ],
+            "primaryKey": [ "roleId", "permissionId" ],
+            "keys": [
+                {"name": "fk_rolePermissions_2_idx", "fields":[ {"name": "permissionId", "sort": "ASC"}]}
+            ],
+            "constraints": [
+                {"name": "fk_rolePermissions_1", "type": "foreignKey", "field": "roleId", "references": {"table": "roles", "field": "id"}, "onDelete": "noAction", "onUpdate": "noAction"},
+                {"name": "fk_rolePermissions_2", "type": "foreignKey", "field": "permissionId", "references": {"table": "permissions", "field": "id"}, "onDelete": "cascade", "onUpdate": "noAction"}
+            ],
+            "dbOptions" : "ENGINE=InnoDB DEFAULT CHARSET=latin1"
+        },
+        {   "name": "datasetUsers",
+            "fields" : [
+                { "name": "datasetId", "type": "int", "canBeNull": false},
+                { "name": "userId", "type": "int", "canBeNull": false},
+                { "name": "roleId", "type": "int", "canBeNull": false}
+            ],
+            "primaryKey": [ "datasetId", "userId" ],
+            "keys": [
+                {"name": "fk_datasetUsers_1", "fields": ["datasetId"],
+                {"name": "fk_datasetUsers_2", "fields": ["userId"],
+                {"name": "fk_datasetUsers_3", "fields": ["roleId"]}
+            ],
+            "constraints": [
+                {"name": "fk_datasetUsers_1", "type": "foreignKey", "field": "datasetId", "references": {"table": "datasets", "field": "id"}, "onDelete": "noAction", "onUpdate": "noAction"},
+                {"name": "fk_datasetUsers_2", "type": "foreignKey", "field": "userId", "references": {"table": "users", "field": "id"}, "onDelete": "noAction", "onUpdate": "noAction"},
+                {"name": "fk_datasetUsers_3", "type": "foreignKey", "field": "roleId", "references": {"table": "roles", "field": "id"}, "onDelete": "noAction", "onUpdate": "noAction"}
+            ],
+            "dbOptions" : "ENGINE=InnoDB DEFAULT CHARSET=latin1"
+        },
+        {   "name": "classlists",
+            "fields" : [
+                { "name": "id", "type": "int", "canBeNull": false, "autoIncrement": true},
+                { "name": "name", "type": "varchar(255)", "canBeNull": false},
+                { "name": "datasetId", "type": "int", "canBeNull": false}
+            ],
+            "primaryKey": [ "id" ],
+            "keys": [
+                {"name": "fk_classList_1", "fields": ["datasetId"]}
+            ],
+            "constraints": [
+                {"name": "fk_classList_1", "type": "foreignKey", "field": "datasetId", "references": {"table": "datasets", "field": "id"}, "onDelete": "noAction", "onUpdate": "noAction"}
+            ],
+            "dbOptions" : "ENGINE=InnoDB DEFAULT CHARSET=latin1"
+        },
+        {   "name": "classes",
+            "fields" : [
+                { "name": "id", "type": "int", "canBeNull": false, "autoIncrement": true},
+                { "name": "classlistId", "type": "int", "canBeNull": false},
+                { "name": "name", "type": "varchar(255)", "canBeNull": false},
+                { "name": "description", "type": "text", "canBeNull": false}
+            ],
+            "primaryKey": [ "id" ],
+            "keys": [
+                {"name": "fk_classes_1", "fields": ["classlistId"]}
+            ],
+            "constraints": [
+                {"name": "fk_classes_1", "type": "foreignKey", "field": "classlistId", "references": {"table": "classlists", "field": "id"}, "onDelete": "noAction", "onUpdate": "noAction"}
+            ],
+            "dbOptions" : "ENGINE=InnoDB DEFAULT CHARSET=latin1"
+        },
+        {   "name": "dataobjects",
+            "fields" : [
+                { "name": "id", "type": "bigint", "canBeNull": false, "autoIncrement": true},
+                { "name": "datasetId", "type": "int", "canBeNull": false},
+                { "name": "type", "type": "enum", "values": ["image"], "canBeNull": false},
+                { "name": "uri", "type": "varchar(255)", "canBeNull": false},
+                { "name": "props", "type": "json", "canBeNull": false}
+            ],
+            "primaryKey": [ "id" ],
+            "keys": [
+                {"name": "fk_dataobjects_1", "fields": ["datasetId"]}
+            ],
+            "constraints": [
+                {"name": "fk_dataobjects_1", "type": "foreignKey", "field": "datasetId", "references": {"table": "datasets", "field": "id"}, "onDelete": "noAction", "onUpdate": "noAction"}
+            ],
+            "dbOptions" : "ENGINE=InnoDB DEFAULT CHARSET=latin1"
+        },
+        {   "name": "trainingData",
+            "fields" : [
+                { "name": "id", "type": "int", "canBeNull": false, "autoIncrement": true},
+                { "name": "dataobjectId", "type": "bigint", "canBeNull": false},
+                { "name": "type", "type": "enum", "values": ["objectClassification"], "canBeNull": false}
+            ],
+            "primaryKey": [ "id" ],
+            "keys": [
+                {"name": "fk_trainingData_1", "fields": ["dataobjectId"]}
+            ],
+            "constraints": [
+                {"name": "fk_trainingData_1", "type": "foreignKey", "field": "dataobjectId", "references": {"table": "dataobjects", "field": "id"}, "onDelete": "noAction", "onUpdate": "noAction"}
+            ],
+            "dbOptions" : "ENGINE=InnoDB DEFAULT CHARSET=latin1"
+        },
+        {   "name": "trainingDataObjectClassifications",
+            "fields" : [
+                { "name": "id", "type": "int", "canBeNull": false, "autoIncrement": true},
+                { "name": "classId", "type": "int", "canBeNull": false}
+            ],
+            "primaryKey": [ "id" ],
+            "keys": [
+                {"name": "fk_trainingDataObjectClassifications_1", "fields": ["classId"]}
+            ],
+            "constraints": [
+                {"name": "fk_trainingDataObjectClassifications_1", "type": "foreignKey", "field": "classId", "references": {"table": "classes", "field": "id"}, "onDelete": "noAction", "onUpdate": "noAction"},
+                {"name": "fk_trainingDataObjectClassifications_2", "type": "foreignKey", "field": "id", "references": {"table": "trainingData", "field": "id"}, "onDelete": "cascade", "onUpdate": "noAction"}
+            ],
+            "dbOptions" : "ENGINE=InnoDB DEFAULT CHARSET=latin1"
+        }
+    ]
+}

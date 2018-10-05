@@ -1,0 +1,85 @@
+{
+    "tableDefaults": [
+        {"engine": "InnoDB", "defaultCharset": "latin1"}
+    ],
+    "tables": {
+        "users": [
+            {"field": "id", "type": "int", "notNull": true, "autoIncrement": true, "primary": true},
+            {"field": "login", "type": "char(255)", "notNull": true},
+            {"field": "password", "type": "char(255)", "notNull": true},
+            {"field": "email", "type": "char(255)", "notNull": true}
+        ],
+
+        "tasks": [
+            {"field": "id", "type": "int", "notNull": true, "autoIncrement": true, "primary": true},
+            {"field": "name", "type": "char(255)", "notNull": true},
+            {"field": "description", "type": "text", "notNull": true}
+        ],
+
+        "datasets": [
+            {"field": "id", "type": "int", "notNull": true, "autoIncrement": true, "primary": true},
+            {"field": "name", "type": "char(255)", "notNull": true},
+            {"field": "type", "type": "enum", "values": ["images"], "notNull": true},
+            {"field": "taskId", "notNull": true, "foreignKey": "tasks"},
+            {"field": "uri", "type": "char(255)", "notNull": true},
+            {"field": "description", "type": "text", "notNull": true},
+            {"field": "props", "type": "json", "notNull": true}
+        ],
+
+        "roles": [
+            {"field": "id", "type": "int", "notNull": true, "autoIncrement": true, "primary": true},
+            {"field": "name", "type": "char(255)", "notNull": true},
+            {"field": "isSystemRole", "type": "tinyint(1)", "notNull": true, "default": 0}
+        ],
+
+        "permissions": [
+            {"field": "id", "type": "int", "notNull": true, "autoIncrement": true, "primary": true},
+            {"field": "uri", "type": "char(255)", "notNull": true},
+            {"field": "name", "type": "char(255)", "notNull": true},
+            {"field": "description", "type": "text", "notNull": true}
+        ],
+
+        "rolePermissions": [
+            {"field": "roleId", "notNull": true, "primary": true, "foreignKey": "roles"},
+            {"field": "permissionId", "notNull": true, "primary": true, "foreignKey": "permissions", "onDelete": "cascade"}
+        ],
+
+        "datasetUsers": [
+            {"field": "datasetId", "notNull": true, "primary": true, "foreignKey": "datasets"},
+            {"field": "userId", "notNull": true, "primary": true, "foreignKey": "users"},
+            {"field": "roleId", "notNull": true, "foreignKey": "roles"}
+        ],
+
+        "classlists": [
+            {"field": "id", "type": "int", "notNull": true, "autoIncrement": true, "primary": true},
+            {"field": "name", "type": "char(255)", "notNull": true},
+            {"field": "datasetId", "notNull": true, "foreignKey": "datasets"},
+        ],
+
+        "classes": [
+            {"field": "id", "type": "int", "notNull": true, "autoIncrement": true, "primary": true},
+            {"field": "classlistId", "notNull": true, "foreignKey": "classes"},
+            {"field": "name", "type": "char(255)", "notNull": true},
+            {"field": "description", "type": "text", "notNull": true},
+        ],
+
+        "dataobjects": [
+            {"field": "id", "type": "bigint", "notNull": true, "autoIncrement": true, "primary": true},
+            {"field": "datasetId", "notNull": true, "foreignKey": "datasets"},
+            {"field": "type", "type": "enum", "values": ["image"], "notNull": true},
+            {"field": "uri", "type": "char(255)", "notNull": true},
+            {"field": "props", "type": "json", "notNull": true}
+        ],
+
+        "trainingData": [
+            {"field": "id", "type": "int", "notNull": true, "autoIncrement": true, "primary": true},
+            {"fioeld": "dataobjectId", "notNull": true, "foreignKey": "dataobjects"},
+            {"field": "type", "type": "enum", "values": ["objectClassification"], "notNull": true},
+        ],
+
+        "trainingDataObjectClassifications": [
+            {"field": "id", "type": "int", "notNull": true, "autoIncrement": true, "primary": true, "foreignKey": "trainingData"},
+            {"field": "classId", "notNull": true, "foreignKey": "classes", "onDelete": "cascade"},
+        ]
+    }
+}

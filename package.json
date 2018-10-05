@@ -4,7 +4,7 @@
   "description": "Simple Object Relational Manager for node",
   "main": "lib/index.js",
   "scripts": {
-    "test": "nyc --reporter=html --reporter=text mocha tests/*.spec.js tests/**/*.spec.js",
+    "test": "nyc --reporter=html --reporter=text mocha test/*.spec.js test/**/*.spec.js",
     "test-dev": "nodemon -x npm -- test"
   },
   "author": "Giovany Vega <aleph.omega@gmail.com>",
