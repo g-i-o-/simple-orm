@@ -1,6 +1,10 @@
 simple-orm
 ==========
-v0.0.1
+
+![](https://img.shields.io/badge/version-0.0.1-green.svg)
+
+
+A Simple Object Relational Manager for node.
 
 Because:
 - I got tired of writing the same database querying methods on node.
