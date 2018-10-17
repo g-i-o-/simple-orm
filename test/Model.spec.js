@@ -329,10 +329,10 @@ describe('Model', () => {
             const result = await model.find({ id: 3, orderBy: 'id' });
             expect(mockConnection.query.callCount).to.equal(1);
             expect(mockConnection.query.getCall(0).args).to.deep.equal([{
-                select: ['id'],
+                select: [{ field: 'id', table: 'U' }],
                 from: [{ table: model.name, as: model.alias }],
                 where: [{ lhs: { table: model.alias, field: 'id' }, op: '=', rhs: { value: 3 } }],
-                orderBy: ['id'],
+                orderBy: [{ field: 'id', table: 'U', sort: undefined }],
                 random: undefined,
                 limit: undefined,
             }]);
@@ -344,7 +344,7 @@ describe('Model', () => {
             const result = await model.find();
             expect(mockConnection.query.callCount).to.equal(1);
             expect(mockConnection.query.getCall(0).args).to.deep.equal([{
-                select: ['id'],
+                select: [{ field: 'id', table: 'U' }],
                 from: [{ table: model.name, as: model.alias }],
                 where: [],
                 orderBy: undefined,
@@ -360,7 +360,7 @@ describe('Model', () => {
                 const result = await model.find({ id: 3 });
                 expect(mockConnection.query.callCount).to.equal(1);
                 expect(mockConnection.query.getCall(0).args).to.deep.equal([{
-                    select: ['id'],
+                    select: [{ field: 'id', table: 'U' }],
                     from: [{ table: model.name, as: model.alias }],
                     where: [{ lhs: { table: model.alias, field: 'id' }, op: '=', rhs: { value: 3 } }],
                     orderBy: undefined,
@@ -398,7 +398,7 @@ describe('Model', () => {
                 const result = await avatarsModel.find({ 'user.id': 3 });
                 expect(mockConnection.query.callCount).to.equal(1);
                 expect(mockConnection.query.getCall(0).args).to.deep.equal([{
-                    select: ['id', 'url', 'userId'],
+                    select: [{ table: 'A', field: 'id' }, { table: 'A', field: 'url' }, { table: 'A', field: 'userId' }],
                     from: [
                         { table: 'avatars', as: 'A' },
                         { table: 'users', as: 'U', join: true, on: {
@@ -420,7 +420,7 @@ describe('Model', () => {
                 const result = await usersModel.find({ 'avatars.url': 'url' });
                 expect(mockConnection.query.callCount).to.equal(1);
                 expect(mockConnection.query.getCall(0).args).to.deep.equal([{
-                    select: ['id', 'name'],
+                    select: [{ table: 'U', field: 'id' }, { table: 'U', field: 'name' }],
                     from: [
                         { table: 'users', as: 'U' },
                         { table: 'avatars', as: 'A', join: true, on: {
@@ -443,7 +443,7 @@ describe('Model', () => {
             const result = await model.find({ qwe: 3 });
             expect(mockConnection.query.callCount).to.equal(1);
             expect(mockConnection.query.getCall(0).args).to.deep.equal([{
-                select: ['id'],
+                select: [{ field: 'id', table: 'U' }],
                 from: [{ table: model.name, as: model.alias }],
                 where: [],
                 orderBy: undefined,
@@ -473,7 +473,7 @@ describe('Model', () => {
                 const result = await model.find({ qwe: 3 });
                 expect(model.findPreprocess.callCount).to.equal(1);
                 expect(model.findPreprocess.getCall(0).args).to.deep.equal([{
-                    select: ['id'],
+                    select: [{ field: 'id', table: 'U' }],
                     from: [{ table: model.name, as: model.alias }],
                     where: [],
                     orderBy: undefined,
@@ -492,7 +492,7 @@ describe('Model', () => {
                 const result = await model.find({ qwe: 3 });
                 expect(mockConnection.query.callCount).to.equal(1);
                 expect(mockConnection.query.getCall(0).args).to.deep.equal([{
-                    select: ['id'],
+                    select: [{ field: 'id', table: 'U' }],
                     from: [{ table: model.name, as: model.alias }],
                     where: [],
                     orderBy: undefined,
