@@ -1,7 +1,7 @@
 simple-orm
 ==========
 
-![](https://img.shields.io/badge/version-0.0.1-green.svg)
+![](https://img.shields.io/badge/version-0.0.2-green.svg)
 
 
 A Simple Object Relational Manager for node.
