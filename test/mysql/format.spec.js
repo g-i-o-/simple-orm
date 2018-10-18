@@ -2,6 +2,7 @@
 const { expect } = require('chai');
 const sinon = require('sinon');
 const mockery = require('mockery');
+const rewire = require('rewire');
 
 describe('format', () => {
     let format;
@@ -355,7 +356,7 @@ describe('format', () => {
     });
 
     beforeEach(() => {
-        mocks.mysql.escape.callsFake(x => JSON.stringify(x));
+        mocks.mysql.escape.callsFake(x => (Array.isArray(x) ? x.map(y => JSON.stringify(y)).join(', ') : JSON.stringify(x)));
         mocks.mysql.escapeId.callsFake(x => (`${x}`).split('.').map(y => `\`${y}\``).join('.'));
     });
 
@@ -381,6 +382,84 @@ describe('format', () => {
         it('should delegate to mysql.escapeId', () => {
             format.escapeId(1);
             expect(mocks.mysql.escapeId.calledOnce).to.be.true;
+        });
+    });
+
+    describe('statement()', () => {
+        const statements = ['begin', 'commit', 'rollback'];
+
+        it(`formats statements ${statements.join(', ')}`, () => {
+            statements.forEach((statement) => {
+                expect(format.statement({ [statement]: true }));
+            });
+        });
+
+        it('otherwise throws an error', () => {
+            expect(() => format.statement({ notAStatement: true })).to.throw(Error);
+        });
+    });
+
+    describe('insert()', () => {
+        it('formats insert statements', () => {
+            expect(format.insert({
+                into: 'targetTable',
+                fields: ['a', 'b', 'c'],
+                values: [
+                    { a: 1, b: 2, c: 3 },
+                    { a: 4, b: 5, c: 6 },
+                ],
+            })).to.equal([
+                'INSERT INTO `targetTable`(`a`, `b`, `c`) VALUES \n',
+                '    (1, 2, 3),\n',
+                '    (4, 5, 6);',
+            ].join(''));
+        });
+    });
+
+    describe('query()', () => {
+        it('formats sql query statements', () => {
+            expect(format.query({
+                select: ['a', 'b', 'c'],
+                from: [{ table: 'table', as: 'T' }],
+                where: [{ lhs: { field: 'a' }, op: '=', rhs: { value: 5 } }],
+                orderBy: ['a'],
+                limit: { offset: 0, count: 4 },
+            })).to.equal([
+                'SELECT "a", "b", "c"\n',
+                'FROM  `table` `T` \n',
+                'WHERE (`a` = 5)\n',
+                'ORDER BY "a" \n',
+                'LIMIT 0, 4\n',
+                ';',
+            ].join(''));
+        });
+
+        it('supports group by', () => {
+            expect(format.query({
+                from: [{ table: 'table', as: 'T' }],
+                groupBy: ['a'],
+            })).to.equal([
+                'SELECT *\n',
+                'FROM  `table` `T` \n',
+                'GROUP BY "a" \n',
+                ';',
+            ].join(''));
+        });
+
+        it('supports random sorting', () => {
+            expect(format.query({
+                random: true,
+                from: [{ table: 'table', as: 'T' }],
+            })).to.equal([
+                'SELECT *\n',
+                'FROM  `table` `T` \n',
+                'ORDER BY RAND() \n',
+                ';',
+            ].join(''));
+        });
+
+        it('if query is already a string, returns it', () => {
+            expect(format.query('SELECT alkjklasjasjdlkajas')).to.equal('SELECT alkjklasjasjdlkajas');
         });
     });
 
@@ -460,6 +539,13 @@ describe('format', () => {
             it('should return the sql format for a NOT expression', () => {
                 const result = format.conditionByOp.NOT({ asIs: 'string' });
                 expect(result).to.equal('NOT string');
+            });
+        });
+
+        describe('IN()', () => {
+            it('should return the sql format for an IN expression', () => {
+                const result = format.conditionByOp.IN({ asIs: 'string' }, [1, 2, 3]);
+                expect(result).to.equal('string IN (1, 2, 3)');
             });
         });
 
