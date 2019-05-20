@@ -566,6 +566,27 @@ describe('format', () => {
         });
     });
 
+    describe('selectTerm()', () => {
+        it('accepts an `as` parameter, for aliasing the term expression.', () => {
+            const result = format.selectTerm({ field: 'termField', as: 'fieldAlias' });
+            expect(result).to.equal('`termField` AS `fieldAlias`');
+        });
+
+        it('`as` parameter is optional.', () => {
+            const result = format.selectTerm(null);
+            expect(result).to.equal('NULL');
+        });
+
+        it('delegates other parameters to format.term.', () => {
+            const spy = sinon.spy(format, 'term');
+            const result = format.selectTerm({ field: 'termField', as: 'fieldAlias' });
+            format.term.restore();
+            expect(result).to.equal('`termField` AS `fieldAlias`');
+            expect(spy.callCount).to.equal(1);
+            expect(spy.getCall(0).args).to.deep.equal([{ field: 'termField', as: 'fieldAlias' }]);
+        });
+    });
+
     describe('term()', () => {
         [
             [undefined, 'NULL'],
