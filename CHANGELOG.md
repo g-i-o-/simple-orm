@@ -1,0 +1,13 @@
+- 0.0.3
+    - Improved formatting on mysql, INSERT INTO query
+    - Improved unit tests
+    - Added SIMPLE_ORM_TIMEOUT env variable
+    - Added Field.show Field.canBeShown flags and Model.defaultShowableFields list to better control field showability.
+    - Separated term and selectTerm in format grammar
+- 0.0.2
+    - Improved query building and formatting
+    - Adding transaction support
+    - Improved unit tests
+- 0.0.1
+    - Initial Version
+    - Added core modules, default mysql connector and initial formatting
