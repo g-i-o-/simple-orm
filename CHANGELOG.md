@@ -1,3 +1,5 @@
+- 0.0.4
+    - added IS and IS NOT operators
 - 0.0.3
     - Improved formatting on mysql, INSERT INTO query
     - Improved unit tests
