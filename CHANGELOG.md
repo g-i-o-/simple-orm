@@ -1,3 +1,5 @@
+- 0.0.5
+    - fixing dependency vulnerabilities
 - 0.0.4
     - added IS and IS NOT operators
 - 0.0.3
