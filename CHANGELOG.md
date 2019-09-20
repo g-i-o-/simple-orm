@@ -1,3 +1,8 @@
+- 0.1.0
+    - adding schemas
+    - adding update support
+    - adding IN_QUERY clauses
+    - fixing bugs
 - 0.0.5
     - fixing dependency vulnerabilities
 - 0.0.4
