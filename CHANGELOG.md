@@ -1,3 +1,5 @@
+- 0.1.1
+    - field mappings now get re-added after resolving fields in Model to account for name changes.
 - 0.1.0
     - adding schemas
     - adding update support
