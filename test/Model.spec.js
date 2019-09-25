@@ -64,7 +64,7 @@ describe('Model', () => {
                 new Field(fieldDef),
             ]);
             expect(model.fieldsMap).to.deep.equal({
-                id: fieldDef,
+                id: new Field(fieldDef),
             });
             expect(model.keys).to.equal(undefined);
             expect(model.primaryKey).to.deep.equal(['id']);
@@ -149,14 +149,14 @@ describe('Model', () => {
                 model.addField({ id: true });
                 expect(model.fields.length).to.equal(1);
                 expect(model.fields[0]).to.be.instanceof(Field);
-                expect(model.fields[0]).to.deep.equal({
+                expect(model.fields[0]).to.deep.equal(new Field({
                     name: 'id',
                     type: 'int',
                     default: undefined,
                     values: undefined,
                     canBeNull: false,
                     autoIncrement: true,
-                });
+                }));
                 expect(model.primaryKey).to.deep.equal(['id']);
             });
             it('name, type, autoIncrement and canBeNull can be overriden', () => {
@@ -171,14 +171,14 @@ describe('Model', () => {
                 });
                 expect(model.fields.length).to.equal(1);
                 expect(model.fields[0]).to.be.instanceof(Field);
-                expect(model.fields[0]).to.deep.equal({
+                expect(model.fields[0]).to.deep.equal(new Field({
                     name: 'id',
                     type: 'otherinttype',
                     default: undefined,
                     values: undefined,
                     canBeNull: true,
                     autoIncrement: false,
-                });
+                }));
             });
         });
 
@@ -191,14 +191,14 @@ describe('Model', () => {
                 model1.addField({ name: 'houseId', references: model2 });
                 expect(model1.fields.length).to.equal(2);
                 expect(model1.fields[1]).to.be.instanceof(Field);
-                expect(model1.fields[1]).to.deep.equal({
+                expect(model1.fields[1]).to.deep.equal(new Field({
                     name: 'houseId',
                     type: 'int',
                     default: undefined,
                     values: undefined,
                     canBeNull: undefined,
                     autoIncrement: undefined,
-                });
+                }));
                 expect(model1.linkReference.callCount).to.equal(1);
                 expect(model1.linkReference.getCall(0).calledOn(model1)).to.equal(true);
                 expect(model1.linkReference.getCall(0).args).to.deep.equal(
@@ -213,14 +213,14 @@ describe('Model', () => {
                 model1.addField({ name: 'house', references: model2 });
                 expect(model1.fields.length).to.equal(2);
                 expect(model1.fields[1]).to.be.instanceof(Field);
-                expect(model1.fields[1]).to.deep.equal({
+                expect(model1.fields[1]).to.deep.equal(new Field({
                     name: 'houseId',
                     type: 'int',
                     default: undefined,
                     values: undefined,
                     canBeNull: undefined,
                     autoIncrement: undefined,
-                });
+                }));
                 expect(model1.linkReference.callCount).to.equal(1);
                 expect(model1.linkReference.getCall(0).calledOn(model1)).to.equal(true);
                 expect(model1.linkReference.getCall(0).args).to.deep.equal(
@@ -235,14 +235,14 @@ describe('Model', () => {
                 model1.addField({ references: model2 });
                 expect(model1.fields.length).to.equal(2);
                 expect(model1.fields[1]).to.be.instanceof(Field);
-                expect(model1.fields[1]).to.deep.equal({
+                expect(model1.fields[1]).to.deep.equal(new Field({
                     name: 'usersId',
                     type: 'int',
                     default: undefined,
                     values: undefined,
                     canBeNull: undefined,
                     autoIncrement: undefined,
-                });
+                }));
                 expect(model1.linkReference.callCount).to.equal(1);
                 expect(model1.linkReference.getCall(0).calledOn(model1)).to.equal(true);
                 expect(model1.linkReference.getCall(0).args).to.deep.equal(
@@ -266,14 +266,14 @@ describe('Model', () => {
                 model.addField({ name: 'a', enum: ['v1', 'v2', 'v3'] });
                 expect(model.fields.length).to.equal(1);
                 expect(model.fields[0]).to.be.instanceof(Field);
-                expect(model.fields[0]).to.deep.equal({
+                expect(model.fields[0]).to.deep.equal(new Field({
                     name: 'a',
                     type: 'enum',
                     default: undefined,
                     values: ['v1', 'v2', 'v3'],
                     canBeNull: undefined,
                     autoIncrement: undefined,
-                });
+                }));
             });
         });
 
@@ -290,14 +290,14 @@ describe('Model', () => {
                 model.addField({ name: 'qwe', type: 'int' });
                 expect(model.fields.length).to.equal(1);
                 expect(model.fields[0]).to.be.instanceof(Field);
-                expect(model.fields[0]).to.deep.equal({
+                expect(model.fields[0]).to.deep.equal(new Field({
                     name: 'qwe',
                     type: 'int',
                     default: undefined,
                     values: undefined,
                     canBeNull: undefined,
                     autoIncrement: undefined,
-                });
+                }));
                 expect(model.primaryKey).to.equal(undefined);
             });
 
