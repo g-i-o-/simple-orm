@@ -512,6 +512,8 @@ describe('Model', () => {
                         type: 'int',
                         autoIncrement: true,
                         canBeNull: false,
+                        canBeShown: true,
+                        show: true,
                     },
                 ],
             });
