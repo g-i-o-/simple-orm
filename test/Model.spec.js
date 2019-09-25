@@ -39,6 +39,18 @@ const emptyModel = {
 };
 
 
+const mock_query = query => ({
+    select: [],
+    from: [],
+    where: [],
+    orderBy: undefined,
+    groupBy: undefined,
+    distinct: undefined,
+    random: undefined,
+    limit: undefined,
+    ...query
+});
+
 describe('Model', () => {
     let revertModelSet = null;
     before(() => {
@@ -64,7 +76,7 @@ describe('Model', () => {
                 new Field(fieldDef),
             ]);
             expect(model.fieldsMap).to.deep.equal({
-                id: fieldDef,
+                id: new Field(fieldDef),
             });
             expect(model.keys).to.equal(undefined);
             expect(model.primaryKey).to.deep.equal(['id']);
@@ -149,14 +161,14 @@ describe('Model', () => {
                 model.addField({ id: true });
                 expect(model.fields.length).to.equal(1);
                 expect(model.fields[0]).to.be.instanceof(Field);
-                expect(model.fields[0]).to.deep.equal({
+                expect(model.fields[0]).to.deep.equal(new Field({
                     name: 'id',
                     type: 'int',
                     default: undefined,
                     values: undefined,
                     canBeNull: false,
                     autoIncrement: true,
-                });
+                }));
                 expect(model.primaryKey).to.deep.equal(['id']);
             });
             it('name, type, autoIncrement and canBeNull can be overriden', () => {
@@ -171,14 +183,14 @@ describe('Model', () => {
                 });
                 expect(model.fields.length).to.equal(1);
                 expect(model.fields[0]).to.be.instanceof(Field);
-                expect(model.fields[0]).to.deep.equal({
+                expect(model.fields[0]).to.deep.equal(new Field({
                     name: 'id',
                     type: 'otherinttype',
                     default: undefined,
                     values: undefined,
                     canBeNull: true,
                     autoIncrement: false,
-                });
+                }));
             });
         });
 
@@ -191,14 +203,14 @@ describe('Model', () => {
                 model1.addField({ name: 'houseId', references: model2 });
                 expect(model1.fields.length).to.equal(2);
                 expect(model1.fields[1]).to.be.instanceof(Field);
-                expect(model1.fields[1]).to.deep.equal({
+                expect(model1.fields[1]).to.deep.equal(new Field({
                     name: 'houseId',
                     type: 'int',
                     default: undefined,
                     values: undefined,
                     canBeNull: undefined,
                     autoIncrement: undefined,
-                });
+                }));
                 expect(model1.linkReference.callCount).to.equal(1);
                 expect(model1.linkReference.getCall(0).calledOn(model1)).to.equal(true);
                 expect(model1.linkReference.getCall(0).args).to.deep.equal(
@@ -213,14 +225,14 @@ describe('Model', () => {
                 model1.addField({ name: 'house', references: model2 });
                 expect(model1.fields.length).to.equal(2);
                 expect(model1.fields[1]).to.be.instanceof(Field);
-                expect(model1.fields[1]).to.deep.equal({
+                expect(model1.fields[1]).to.deep.equal(new Field({
                     name: 'houseId',
                     type: 'int',
                     default: undefined,
                     values: undefined,
                     canBeNull: undefined,
                     autoIncrement: undefined,
-                });
+                }));
                 expect(model1.linkReference.callCount).to.equal(1);
                 expect(model1.linkReference.getCall(0).calledOn(model1)).to.equal(true);
                 expect(model1.linkReference.getCall(0).args).to.deep.equal(
@@ -235,14 +247,14 @@ describe('Model', () => {
                 model1.addField({ references: model2 });
                 expect(model1.fields.length).to.equal(2);
                 expect(model1.fields[1]).to.be.instanceof(Field);
-                expect(model1.fields[1]).to.deep.equal({
+                expect(model1.fields[1]).to.deep.equal(new Field({
                     name: 'usersId',
                     type: 'int',
                     default: undefined,
                     values: undefined,
                     canBeNull: undefined,
                     autoIncrement: undefined,
-                });
+                }));
                 expect(model1.linkReference.callCount).to.equal(1);
                 expect(model1.linkReference.getCall(0).calledOn(model1)).to.equal(true);
                 expect(model1.linkReference.getCall(0).args).to.deep.equal(
@@ -266,14 +278,14 @@ describe('Model', () => {
                 model.addField({ name: 'a', enum: ['v1', 'v2', 'v3'] });
                 expect(model.fields.length).to.equal(1);
                 expect(model.fields[0]).to.be.instanceof(Field);
-                expect(model.fields[0]).to.deep.equal({
+                expect(model.fields[0]).to.deep.equal(new Field({
                     name: 'a',
                     type: 'enum',
                     default: undefined,
                     values: ['v1', 'v2', 'v3'],
                     canBeNull: undefined,
                     autoIncrement: undefined,
-                });
+                }));
             });
         });
 
@@ -290,14 +302,14 @@ describe('Model', () => {
                 model.addField({ name: 'qwe', type: 'int' });
                 expect(model.fields.length).to.equal(1);
                 expect(model.fields[0]).to.be.instanceof(Field);
-                expect(model.fields[0]).to.deep.equal({
+                expect(model.fields[0]).to.deep.equal(new Field({
                     name: 'qwe',
                     type: 'int',
                     default: undefined,
                     values: undefined,
                     canBeNull: undefined,
                     autoIncrement: undefined,
-                });
+                }));
                 expect(model.primaryKey).to.equal(undefined);
             });
 
@@ -328,14 +340,12 @@ describe('Model', () => {
             const model = new Model(modelDef, mockConnection);
             const result = await model.find({ id: 3, orderBy: 'id' });
             expect(mockConnection.query.callCount).to.equal(1);
-            expect(mockConnection.query.getCall(0).args).to.deep.equal([{
+            expect(mockConnection.query.getCall(0).args).to.deep.equal([mock_query({
                 select: [{ field: 'id', table: 'U' }],
                 from: [{ table: model.name, as: model.alias }],
                 where: [{ lhs: { table: model.alias, field: 'id' }, op: '=', rhs: { value: 3 } }],
                 orderBy: [{ field: 'id', table: 'U', sort: undefined }],
-                random: undefined,
-                limit: undefined,
-            }]);
+            })]);
             expect(result).to.deep.equal(['first result', 'second result']);
         });
         it('no options performs query without any where clauses.', async () => {
@@ -343,14 +353,10 @@ describe('Model', () => {
             const model = new Model(modelDef, mockConnection);
             const result = await model.find();
             expect(mockConnection.query.callCount).to.equal(1);
-            expect(mockConnection.query.getCall(0).args).to.deep.equal([{
+            expect(mockConnection.query.getCall(0).args).to.deep.equal([mock_query({
                 select: [{ field: 'id', table: 'U' }],
                 from: [{ table: model.name, as: model.alias }],
-                where: [],
-                orderBy: undefined,
-                random: undefined,
-                limit: undefined,
-            }]);
+            })]);
             expect(result).to.deep.equal(['first result', 'second result']);
         });
         describe('{[field]} options', () => {
@@ -359,14 +365,11 @@ describe('Model', () => {
                 const model = new Model(modelDef, mockConnection);
                 const result = await model.find({ id: 3 });
                 expect(mockConnection.query.callCount).to.equal(1);
-                expect(mockConnection.query.getCall(0).args).to.deep.equal([{
+                expect(mockConnection.query.getCall(0).args).to.deep.equal([mock_query({
                     select: [{ field: 'id', table: 'U' }],
                     from: [{ table: model.name, as: model.alias }],
                     where: [{ lhs: { table: model.alias, field: 'id' }, op: '=', rhs: { value: 3 } }],
-                    orderBy: undefined,
-                    random: undefined,
-                    limit: undefined,
-                }]);
+                })]);
                 expect(result).to.deep.equal(['first result', 'second result']);
             });
         });
@@ -397,7 +400,7 @@ describe('Model', () => {
                 mockConnection.query.resetHistory();
                 const result = await avatarsModel.find({ 'user.id': 3 });
                 expect(mockConnection.query.callCount).to.equal(1);
-                expect(mockConnection.query.getCall(0).args).to.deep.equal([{
+                expect(mockConnection.query.getCall(0).args).to.deep.equal([mock_query({
                     select: [{ table: 'A', field: 'id' }, { table: 'A', field: 'url' }, { table: 'A', field: 'userId' }],
                     from: [
                         { table: 'avatars', as: 'A' },
@@ -408,10 +411,7 @@ describe('Model', () => {
                         }},
                     ],
                     where: [{ lhs: { table: 'U', field: 'id' }, op: '=', rhs: { value: 3 } }],
-                    orderBy: undefined,
-                    random: undefined,
-                    limit: undefined,
-                }]);
+                })]);
                 expect(result).to.deep.equal(['first result', 'second result']);
             });
 
@@ -419,7 +419,7 @@ describe('Model', () => {
                 mockConnection.query.resetHistory();
                 const result = await usersModel.find({ 'avatars.url': 'url' });
                 expect(mockConnection.query.callCount).to.equal(1);
-                expect(mockConnection.query.getCall(0).args).to.deep.equal([{
+                expect(mockConnection.query.getCall(0).args).to.deep.equal([mock_query({
                     select: [{ table: 'U', field: 'id' }, { table: 'U', field: 'name' }],
                     from: [
                         { table: 'users', as: 'U' },
@@ -430,10 +430,7 @@ describe('Model', () => {
                         }},
                     ],
                     where: [{ lhs: { table: 'A', field: 'url' }, op: '=', rhs: { value: 'url' } }],
-                    orderBy: undefined,
-                    random: undefined,
-                    limit: undefined,
-                }]);
+                })]);
                 expect(result).to.deep.equal(['first result', 'second result']);
             });
         });
@@ -442,14 +439,10 @@ describe('Model', () => {
             const model = new Model(modelDef, mockConnection);
             const result = await model.find({ qwe: 3 });
             expect(mockConnection.query.callCount).to.equal(1);
-            expect(mockConnection.query.getCall(0).args).to.deep.equal([{
+            expect(mockConnection.query.getCall(0).args).to.deep.equal([mock_query({
                 select: [{ field: 'id', table: 'U' }],
                 from: [{ table: model.name, as: model.alias }],
-                where: [],
-                orderBy: undefined,
-                random: undefined,
-                limit: undefined,
-            }]);
+            })]);
             expect(result).to.deep.equal(['first result', 'second result']);
         });
         it('throws error if no connection can be obtained.', async () => {
@@ -472,14 +465,10 @@ describe('Model', () => {
 
                 const result = await model.find({ qwe: 3 });
                 expect(model.findPreprocess.callCount).to.equal(1);
-                expect(model.findPreprocess.getCall(0).args).to.deep.equal([{
+                expect(model.findPreprocess.getCall(0).args).to.deep.equal([mock_query({
                     select: [{ field: 'id', table: 'U' }],
                     from: [{ table: model.name, as: model.alias }],
-                    where: [],
-                    orderBy: undefined,
-                    random: undefined,
-                    limit: undefined,
-                }, { qwe: 3 }]);
+                }), { qwe: 3 }]);
                 expect(mockConnection.query.callCount).to.equal(1);
                 expect(mockConnection.query.getCall(0).args).to.deep.equal(['new query']);
                 expect(result).to.deep.equal(['first result', 'second result']);
@@ -491,14 +480,10 @@ describe('Model', () => {
 
                 const result = await model.find({ qwe: 3 });
                 expect(mockConnection.query.callCount).to.equal(1);
-                expect(mockConnection.query.getCall(0).args).to.deep.equal([{
+                expect(mockConnection.query.getCall(0).args).to.deep.equal([mock_query({
                     select: [{ field: 'id', table: 'U' }],
                     from: [{ table: model.name, as: model.alias }],
-                    where: [],
-                    orderBy: undefined,
-                    random: undefined,
-                    limit: undefined,
-                }]);
+                })]);
                 expect(result).to.deep.equal(['first result', 'second result']);
             });
         });
@@ -527,6 +512,8 @@ describe('Model', () => {
                         type: 'int',
                         autoIncrement: true,
                         canBeNull: false,
+                        canBeShown: true,
+                        show: true,
                     },
                 ],
             });
