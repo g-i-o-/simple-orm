@@ -1,3 +1,5 @@
+- 0.1.2
+    - fixed bug: now a connection is ensured when performing a transaction.
 - 0.1.1
     - field mappings now get re-added after resolving fields in Model to account for name changes.
 - 0.1.0

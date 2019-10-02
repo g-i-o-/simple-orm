@@ -4,9 +4,15 @@ const sinon = require('sinon');
 
 const parse = require('../../lib/util/parse');
 
-const model1 = { name: 'model1', alias: 'M1', fieldsMap: { id: true, dog: true }, references: {}, backReferences: {}, primaryKey: ['id'] };
-const model2 = { name: 'model2', alias: 'M2', fieldsMap: { id: true, dog: true }, references: {}, backReferences: {}, primaryKey: ['id'] };
-const model3 = { name: 'model3', alias: 'M3', fieldsMap: { id: true, dog: true }, references: {}, backReferences: {}, primaryKey: ['id'] };
+class MockModel {
+    constructor(modeldef){ Object.assign(this, { references: {}, backReferences: {} }, modeldef); }
+    getReference(ref){ return this.references[ref]; }
+    getBackReference(ref){ return this.backReferences[ref]; }
+};
+
+const model1 = new MockModel({ name: 'model1', alias: 'M1', fieldsMap: { id: true, dog: true }, primaryKey: ['id'] });
+const model2 = new MockModel({ name: 'model2', alias: 'M2', fieldsMap: { id: true, dog: true }, primaryKey: ['id'] });
+const model3 = new MockModel({ name: 'model3', alias: 'M3', fieldsMap: { id: true, dog: true }, primaryKey: ['id'] });
 
 model1.references.model2 = { model: model2, field: 'model2Id' };
 model2.backReferences.model1 = { model: model1 };
@@ -29,7 +35,7 @@ describe('parse', () => {
     describe('followReferences', () => {
         it('should parse key and traverse model\'s references, returning its path and possible field.', () => {
             expect(parse.followReferences('model2.id', model1)).to.deep.equal({
-                path: [{ from: model1, key: 'model2', ref: model1.references.model2 }],
+                path: [{ from: model1, key: 'model2', ref: model1.references.model2, joinType:"" }],
                 lastModel: model2,
                 field: 'id',
             });
@@ -37,7 +43,7 @@ describe('parse', () => {
 
         it('can also traverse back references.', () => {
             expect(parse.followReferences('model1.id', model2)).to.deep.equal({
-                path: [{ from: model2, key: 'model1', backRef: model2.backReferences.model1 }],
+                path: [{ from: model2, key: 'model1', backRef: model2.backReferences.model1, joinType:"" }],
                 lastModel: model1,
                 field: 'id',
             });
@@ -45,7 +51,7 @@ describe('parse', () => {
 
         it('if key\'s field is ommited, the field is the last model\'s primary key', () => {
             expect(parse.followReferences('model2', model1)).to.deep.equal({
-                path: [{ from: model1, key: 'model2', ref: model1.references.model2 }],
+                path: [{ from: model1, key: 'model2', ref: model1.references.model2, joinType:"" }],
                 lastModel: model2,
                 field: 'id',
             });
