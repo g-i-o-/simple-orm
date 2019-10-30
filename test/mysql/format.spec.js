@@ -416,6 +416,65 @@ describe('format', () => {
         });
     });
 
+    describe('delete()', () => {
+        it('formats delete statements', () => {
+            expect(format.delete({
+                // delete: [{ table: 'table' }],
+                from: [{ table: 'table' }],
+                where: [{ lhs: { field: 'a' }, op: '=', rhs: { value: 5 } }],
+                orderBy: ['a'],
+                limit: { count: 6 },
+            })).to.equal([
+                'DELETE ',
+                'FROM  `table`  ',
+                'WHERE (`a` = 5)',
+                'LIMIT 6',
+                ';'
+            ].join('\n'));
+        });
+
+        it('allows multiple table statements', () => {
+            expect(format.delete({
+                // delete: [{ table: 'table' }],
+                from: [
+                    { table: 'table', as: 'T1' },
+                    { table: 'table2', as: 'T2', join: true, on: { lhs: { field: 'a' }, op: '=', rhs: { field: 'b' } } }
+                ],
+                where: [{ lhs: { field: 'a' }, op: '=', rhs: { value: 5 } }],
+                orderBy: ['a'],
+                limit: { count: 6 },
+            })).to.equal([
+                'DELETE ',
+                'FROM  `table` `T1` ',
+                'JOIN `table2` `T2` ON `a` = `b`',
+                'WHERE (`a` = 5)',
+                'LIMIT 6',
+                ';'
+            ].join('\n'));
+        });
+
+        it('can have different reference and delete tables', () => {
+            expect(format.delete({
+                delete: [{ table: 'table', as: 'T1' }],
+                from: [
+                    { table: 'table', as: 'T1' },
+                    { table: 'table2', as: 'T2', join: true, on: { lhs: { field: 'a' }, op: '=', rhs: { field: 'b' } } }
+                ],
+                where: [{ lhs: { field: 'a' }, op: '=', rhs: { value: 5 } }],
+                orderBy: ['a'],
+                limit: { count: 6 },
+            })).to.equal([
+                'DELETE `T1`',
+                'FROM  `table` `T1` ',
+                'JOIN `table2` `T2` ON `a` = `b`',
+                'WHERE (`a` = 5)',
+                'LIMIT 6',
+                ';'
+            ].join('\n'));
+        });
+
+    });
+
     describe('query()', () => {
         it('formats sql query statements', () => {
             expect(format.query({
