@@ -32,6 +32,86 @@ describe('parse', () => {
         });
     });
 
+    describe('showArguments', () => {
+        afterEach(() => { sinon.restore(); });
+
+        it('should return [item.asIs] if item has `asIs`.', () => {
+            expect(parse.showArgument({asIs: 'as_is_value #100'})).to.deep.equal(
+                ['as_is_value #100']
+            );
+        });
+
+        it('should call followReferences(item.field) if item has `field`.', () => {
+            const options = {};
+            const refs = {
+                path: [{ from: model1, key: 'model2', ref: model1.references.model2, joinType:"" }],
+                lastModel: model2,
+                field: 'id',
+            };
+            sinon.replace(parse, 'followReferences', sinon.fake.returns(refs));
+
+            expect(parse.showArgument({field: 'model2.id'}, model1, options)).to.deep.equal([{
+                table: model2.alias, field: 'id', as: undefined
+            }, refs]);
+        });
+
+        it('should return a parsed function call if called item has `func`.', () => {
+            const options = {};
+            const refs = {
+                path: [{ from: model1, key: 'model2', ref: model1.references.model2, joinType:"" }],
+                lastModel: model2,
+                field: 'id',
+            };
+            sinon.replace(parse, 'followReferences', sinon.fake.returns(refs));
+
+            expect(parse.showArgument({func: 'FUNC1', args: ['model2.id']}, model1, options)).to.deep.equal([{
+                func: 'FUNC1',
+                args: [
+                    {table: model2.alias, field: 'id', as: undefined},
+                ],
+                as: undefined,
+            }, {
+                path: refs.path,
+                showable: undefined,
+            }]);
+        });
+
+        it('should return a parsed function call if item is a one-attribute object.', () => {
+            const options = {};
+            const refs = {
+                path: [{ from: model1, key: 'model2', ref: model1.references.model2, joinType:"" }],
+                lastModel: model2,
+                field: 'id',
+            };
+            sinon.replace(parse, 'followReferences', sinon.fake.returns(refs));
+
+            expect(parse.showArgument({FUNC1: ['model2.id']}, model1, options)).to.deep.equal([{
+                func: ['FUNC1'],
+                args: [
+                    {table: model2.alias, field: 'id', as: undefined},
+                ],
+                as: undefined,
+            }, {
+                path: refs.path,
+                showable: undefined,
+            }]);
+        });
+
+        it('should call followReferences if called with anything else.', () => {
+            const options = {};
+            const refs = {
+                path: [{ from: model1, key: 'model2', ref: model1.references.model2, joinType:"" }],
+                lastModel: model2,
+                field: 'id',
+            };
+            sinon.replace(parse, 'followReferences', sinon.fake.returns(refs));
+
+            expect(parse.showArgument('model2.id', model1, options)).to.deep.equal([{
+                table: model2.alias, field: 'id', as: undefined
+            }, refs]);
+        });
+    });
+
     describe('followReferences', () => {
         it('should parse key and traverse model\'s references, returning its path and possible field.', () => {
             expect(parse.followReferences('model2.id', model1)).to.deep.equal({
