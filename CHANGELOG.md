@@ -1,3 +1,7 @@
+- 0.2.0
+    - adding delete support
+    - added more unit tests
+    - updated field query parsing to parse {field, as} objects
 - 0.1.2
     - fixed bug: now a connection is ensured when performing a transaction.
 - 0.1.1
