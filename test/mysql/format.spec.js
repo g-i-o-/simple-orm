@@ -416,6 +416,84 @@ describe('format', () => {
         });
     });
 
+    describe('update()', () => {
+        it('formats update statements', () => {
+            expect(format.update({
+                update: [{ table: 'table' }],
+                set: [
+                    { field: { field: 'field1'}, value: { asIs: 101 } },
+                ],
+                where: [{ lhs: { field: 'a' }, op: '=', rhs: { value: 5 } }],
+                limit: { count: 6 },
+            })).to.equal([
+                'UPDATE  `table`  ',
+                '   SET `field1` = (101)',
+                'WHERE (`a` = 5)',
+                'LIMIT 6',
+                ';',
+            ].join('\n'));
+        });
+    });
+
+    describe('delete()', () => {
+        it('formats delete statements', () => {
+            expect(format.delete({
+                // delete: [{ table: 'table' }],
+                from: [{ table: 'table' }],
+                where: [{ lhs: { field: 'a' }, op: '=', rhs: { value: 5 } }],
+                orderBy: ['a'],
+                limit: { count: 6 },
+            })).to.equal([
+                'DELETE ',
+                'FROM  `table`  ',
+                'WHERE (`a` = 5)',
+                'LIMIT 6',
+                ';'
+            ].join('\n'));
+        });
+
+        it('allows multiple table statements', () => {
+            expect(format.delete({
+                // delete: [{ table: 'table' }],
+                from: [
+                    { table: 'table', as: 'T1' },
+                    { table: 'table2', as: 'T2', join: true, on: { lhs: { field: 'a' }, op: '=', rhs: { field: 'b' } } }
+                ],
+                where: [{ lhs: { field: 'a' }, op: '=', rhs: { value: 5 } }],
+                orderBy: ['a'],
+                limit: { count: 6 },
+            })).to.equal([
+                'DELETE ',
+                'FROM  `table` `T1` ',
+                'JOIN `table2` `T2` ON `a` = `b`',
+                'WHERE (`a` = 5)',
+                'LIMIT 6',
+                ';'
+            ].join('\n'));
+        });
+
+        it('can have different reference and delete tables', () => {
+            expect(format.delete({
+                delete: [{ table: 'table', as: 'T1' }],
+                from: [
+                    { table: 'table', as: 'T1' },
+                    { table: 'table2', as: 'T2', join: true, on: { lhs: { field: 'a' }, op: '=', rhs: { field: 'b' } } }
+                ],
+                where: [{ lhs: { field: 'a' }, op: '=', rhs: { value: 5 } }],
+                orderBy: ['a'],
+                limit: { count: 6 },
+            })).to.equal([
+                'DELETE `T1`',
+                'FROM  `table` `T1` ',
+                'JOIN `table2` `T2` ON `a` = `b`',
+                'WHERE (`a` = 5)',
+                'LIMIT 6',
+                ';'
+            ].join('\n'));
+        });
+
+    });
+
     describe('query()', () => {
         it('formats sql query statements', () => {
             expect(format.query({
@@ -490,6 +568,27 @@ describe('format', () => {
         });
         it('if from is a string, then it gets returned', () => {
             expect(format.from('tablename')).to.equal('tablename');
+        });
+    });
+
+    describe('fromAlias()', () => {
+        it('formats a {join, table, as, on} object to the `as` attribute', () => {
+            expect(format.fromAlias({
+                join: true,
+                table: 'tablename',
+                as: 'T',
+                on: { lhs: { table: 'T', field: 'f1' }, op: '=', rhs: { value: 3 } },
+            })).to.equal('`T`');
+        });
+        it('uses table name if no alias is specified', () => {
+            expect(format.fromAlias({
+                join: true,
+                table: 'tablename',
+                on: { lhs: { table: 'tablename', field: 'f1' }, op: '=', rhs: { value: 3 } },
+            })).to.equal('`tablename`');
+        });
+        it('if from is a string, then it gets returned', () => {
+            expect(format.fromAlias('tablename')).to.equal('tablename');
         });
     });
 

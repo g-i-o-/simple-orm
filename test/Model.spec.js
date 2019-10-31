@@ -499,6 +499,23 @@ describe('Model', () => {
         });
     });
 
+    describe('delete()', () => {
+        it('performs a delete statement with the given options.', async () => {
+            const mockConnection = { delete: sinon.stub().resolves({affectedRows: 101}) };
+            const model = new Model(modelDef, mockConnection);
+            const result = await model.delete({ id: 3, orderBy: 'id' });
+            expect(mockConnection.delete.callCount).to.equal(1);
+            expect(mockConnection.delete.getCall(0).args).to.deep.equal([{
+                delete: [{ table: model.name, as: model.alias }],
+                from: [{ table: model.name, as: model.alias }],
+                where: [{ lhs: { table: model.alias, field: 'id' }, op: '=', rhs: { value: 3 } }],
+                orderBy: [{ field: 'id', table: 'U', sort: undefined }],
+                limit: undefined,
+            }]);
+            expect(result).to.deep.equal({affectedRows: 101});
+        });
+    });
+
     describe('getSchema()', () => {
         it('should return n object representing this model\'s schema', () => {
             const model = new Model(modelDef);
