@@ -1,6 +1,6 @@
 {
   "name": "simple-orm",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Simple Object Relational Manager for node",
   "main": "lib/index.js",
   "scripts": {

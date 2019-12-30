@@ -1,3 +1,5 @@
+- 0.2.1
+    - Updated nyc to 15.0.0 to remove security vulnerability in handlebar (dev) sub-dependency
 - 0.2.0
     - adding delete support
     - added more unit tests
